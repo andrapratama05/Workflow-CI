@@ -65,5 +65,5 @@ jobs:
 
     - name: Push Docker image
       run: |
-        docker tag cc $DOCKER_USER_NAME/cc:latest
-        docker push $DOCKER_USER_NAME/cc:latest
+        docker tag mlops $DOCKER_USER_NAME/mlops:latest
+        docker push $DOCKER_USER_NAME/mlops:latest
