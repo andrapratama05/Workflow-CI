@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import mlflow
+import mlflow.sklearn
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.pipeline import Pipeline
@@ -8,40 +9,34 @@ import os
 import sys
 import warnings
 
-if __name__ == '__main__':    
-    print("Active run:", mlflow.active_run())
-    warnings.filterwarnings("ignore")
-    np.random.seed(40)
-    
-    if mlflow.active_run():
-        mlflow.end_run()
-    os.environ.pop('MLFLOW_RUN_ID', None)
-    
-    file_path = sys.argv[1] if len(sys.argv) > 1 else os.path.join(os.path.dirname(os.path.abspath(__file__)), "weather_dataset_preprocessing.csv")
-    
-    df = pd.read_csv(file_path)
-    X = df.drop(columns=['target'], axis=1)
-    y = df['target']
-    
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    input_example = X_train[:5]
-    
-    pipeline = Pipeline([
-        ('rf', RandomForestClassifier())
-    ])
-    
+warnings.filterwarnings("ignore")
+np.random.seed(40)
+
+if __name__ == "__main__":
+
+    file_path = sys.argv[1] if len(sys.argv) > 1 else "weather_dataset_preprocessing.csv"
+
     mlflow.set_tracking_uri(os.environ.get("MLFLOW_TRACKING_URI", "file:./mlruns"))
-    mlflow.set_experiment("weather Type Prediction")
-    
-    mlflow.autolog()
-    
-    with mlflow.start_run(run_name='Random_Forest_Model'):
+    mlflow.set_experiment("weather-type-prediction")
+
+    df = pd.read_csv(file_path)
+    X = df.drop(columns=["target"])
+    y = df["target"]
+
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42
+    )
+
+    pipeline = Pipeline([
+        ("rf", RandomForestClassifier())
+    ])
+
+    # ❌ TIDAK PAKAI autolog
+    with mlflow.start_run(run_name="RandomForest"):
         pipeline.fit(X_train, y_train)
-        
-        y_pred = pipeline.predict(X_test)
-        
+
         mlflow.sklearn.log_model(
             sk_model=pipeline,
-            artifact_path='model',
-            input_example=input_example,
+            artifact_path="model",
+            input_example=X_train.head(5)
         )
