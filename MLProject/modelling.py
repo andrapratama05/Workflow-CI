@@ -32,6 +32,6 @@ if __name__ == "__main__":
     mlflow.sklearn.log_model(
         sk_model=pipeline,
         artifact_path="model",
-        input_example=X_train.head(5)
-        registered_model_name="weather_type_model"
+        input_example=X_train.head(5),
+        registered_model_name="weather_type_model",
     )
