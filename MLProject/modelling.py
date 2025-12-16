@@ -17,7 +17,7 @@ if __name__ == '__main__':
         mlflow.end_run()
     os.environ.pop('MLFLOW_RUN_ID', None)
     
-    file_path = sys.argv[3] if len(sys.argv) > 3 else os.path.join(os.path.dirname(os.path.abspath(__file__)), "weather_dataset_preprocessing.csv")
+    file_path = sys.argv[1] if len(sys.argv) > 1 else os.path.join(os.path.dirname(os.path.abspath(__file__)), "weather_dataset_preprocessing.csv")
     
     df = pd.read_csv(file_path)
     X = df.drop(columns=['target'], axis=1)
