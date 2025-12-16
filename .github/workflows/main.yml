@@ -55,7 +55,7 @@ jobs:
         cd MLProject
         mlflow models build-docker \
           --model-uri "models:/weather_type_model/latest" \
-          --name weather-model
+          --name mlops:latest
 
     - name: Login to Docker Hub
       uses: docker/login-action@v2
