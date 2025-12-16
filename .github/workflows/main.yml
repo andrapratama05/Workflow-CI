@@ -46,6 +46,13 @@ jobs:
       run: |
         echo "MLFLOW_TRACKING_URI=file:./mlruns" >> $GITHUB_ENV
 
+    - name: Debug mlruns location
+      run: |
+        pwd
+        ls -la
+        find . -maxdepth 3 -type d -name mlruns
+
+
     - name: Run MLflow Project
       run: |
         cd MLProject
