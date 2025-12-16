@@ -30,7 +30,7 @@ if __name__ == '__main__':
         ('rf', RandomForestClassifier())
     ])
     
-    mlflow.set_tracking_uri("file:./mlruns")
+    mlflow.set_tracking_uri(os.environ.get("MLFLOW_TRACKING_URI", "file:./mlruns"))
     mlflow.set_experiment("weather Type Prediction")
     
     mlflow.autolog()
