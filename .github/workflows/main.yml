@@ -16,8 +16,8 @@ jobs:
     env:
       CSV_URL: weather_dataset_preprocessing.csv
       MLFLOW_TRACKING_URI: file:./mlruns
-      DOCKER_USER_NAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      DOCKER_USER_NAME: "${{ secrets.DOCKER_USERNAME }}"
+      DOCKER_PASSWORD: "${{ secrets.DOCKER_PASSWORD }}"
 
     steps:
     - name: Checkout repository
@@ -65,5 +65,5 @@ jobs:
 
     - name: Push Docker image
       run: |
-        docker tag mlops $DOCKER_USER_NAME/mlops:latest
-        docker push $DOCKER_USER_NAME/mlops:latest
+        docker tag mlops ${{ secrets.DOCKER_USERNAME }}/mlops:latest
+        docker push ${{ secrets.DOCKER_USERNAME }}/mlops:latest
