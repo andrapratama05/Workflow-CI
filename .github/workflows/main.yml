@@ -73,9 +73,16 @@ jobs:
     - name: Get Latest MLflow run_id
       run: |
         cd MLProject
+
         RUN_ID=$(find mlruns -type d -path "*/artifacts/model" | sort | tail -n 1 | awk -F'/' '{print $(NF-3)}')
+
+        if [ -z "$RUN_ID" ]; then
+          echo "RUN_ID not found!"
+          exit 1
+        fi
+
         echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
-        echo "Latest RUN_ID: $RUN_ID"
+        echo "RUN_ID found: $RUN_ID"
 
     - name: Build Docker Model
       run: |
