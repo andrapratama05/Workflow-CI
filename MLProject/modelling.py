@@ -4,12 +4,11 @@ import mlflow
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.pipeline import Pipeline
-from sklearn.metrics import accuracy_score
 import os
 import sys
 import warnings
 
-if __name__ == '__main__':
+if __name__ == '__main__':    
     print("Active run:", mlflow.active_run())
     warnings.filterwarnings("ignore")
     np.random.seed(40)
@@ -31,6 +30,9 @@ if __name__ == '__main__':
         ('rf', RandomForestClassifier())
     ])
     
+    mlflow.set_tracking_uri("file:./mlruns")
+    mlflow.set_experiment("weather Type Prediction")
+    
     mlflow.autolog()
     
     with mlflow.start_run(run_name='Random_Forest_Model'):
@@ -43,6 +45,3 @@ if __name__ == '__main__':
             artifact_path='model',
             input_example=input_example,
         )
-        
-        acc = accuracy_score(y_test, y_pred)
-        mlflow.log_metric("accuracy", acc)
