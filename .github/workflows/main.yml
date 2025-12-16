@@ -1,4 +1,4 @@
-name: CI for Modelling
+name: CI MLflow Training 
 
 on:
   push:
@@ -7,19 +7,15 @@ on:
     branches: [main]
 
 permissions:
-  contents: write
-
-env:
-  CSV_URL: "weather_dataset_preprocessing.csv"
+  contents: read
 
 jobs:
-  build:
+  build-train-docker:
     runs-on: ubuntu-latest
-    environment: GitHub
 
     env:
-      USER_NAME: ${{ secrets.USER_NAME }}
-      EMAIL: ${{ secrets.EMAIL }}
+      CSV_URL: weather_dataset_preprocessing.csv
+      MLFLOW_TRACKING_URI: file:./mlruns
       DOCKER_USER_NAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
 
@@ -27,65 +23,39 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: Configure Git Identity
-      run: |
-        git config --global user.name "$USER_NAME"
-        git config --global user.email "$EMAIL"
-
-    - name: Set up Python 3.12.10
+    - name: Set up Python 3.12
       uses: actions/setup-python@v4
       with:
-        python-version: "3.12.10"
+        python-version: "3.12"
 
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Set MLflow Tracking URI
-      run: |
-        echo "MLFLOW_TRACKING_URI=file:./mlruns" >> $GITHUB_ENV
-
-    - name: Run MLflow Project
+    - name: Train model with MLflow
       run: |
         cd MLProject
         mlflow run . --env-manager=local
-      env:
-        MLFLOW_TRACKING_URI: file:./mlruns
 
-    - name: Setup Git LFS
-      run: |
-        git lfs install
-        git lfs track "mlruns/**"
-        git add .gitattributes
-        git commit -m "Track mlruns with Git LFS" || true
-
-    - name: Commit MLflow Artifacts
-      run: |
-        if [ -d "mlruns" ]; then
-          git add mlruns/
-        fi
-        if git diff --cached --quiet; then
-          echo "No MLflow changes"
-        else
-          git commit -m "Save MLflow artifacts"
-          git push origin main
-        fi
-
-    - name: Get Latest MLflow run_id
+    - name: Verify MLflow artifacts
       run: |
         cd MLProject
-        RUN_ID=$(find mlruns -type d -path "*/artifacts/model" | sort | tail -n 1 | awk -F'/' '{print $(NF-3)}')
-        echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
+        find mlruns -maxdepth 4 -type d
 
-    - name: Build Docker Image
+    - name: Get MLflow run_id
+      run: |
+        cd MLProject
+        RUN_ID=$(ls mlruns/0 | head -n 1)
+        echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
+        echo "Using RUN_ID=$RUN_ID"
+
+    - name: Build Docker image from MLflow model
       run: |
         cd MLProject
         mlflow models build-docker \
           --model-uri "runs:/$RUN_ID/model" \
           --name cc
-      env:
-        MLFLOW_TRACKING_URI: file:./mlruns
 
     - name: Login to Docker Hub
       uses: docker/login-action@v2
@@ -93,10 +63,7 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
-    - name: Tag Docker Image
+    - name: Push Docker image
       run: |
         docker tag cc $DOCKER_USER_NAME/cc:latest
-
-    - name: Push Docker Image
-      run: |
         docker push $DOCKER_USER_NAME/cc:latest
