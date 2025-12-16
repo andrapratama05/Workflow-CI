@@ -44,7 +44,7 @@ jobs:
 
     - name: Set MLflow Tracking URI
       run: |
-        echo "MLFLOW_TRACKING_URI=sqlite:///mlflow.db" >> $GITHUB_ENV
+        echo "MLFLOW_TRACKING_URI=file:./mlruns" >> $GITHUB_ENV
 
     - name: Run MLflow Project
       run: |
