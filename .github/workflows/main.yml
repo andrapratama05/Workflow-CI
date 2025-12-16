@@ -72,9 +72,10 @@ jobs:
 
     - name: Get Latest MLflow run_id
       run: |
-        RUN_ID=$(ls -td MLProject/mlruns/0/*/ | head -n 1 | awk -F'/' '{print $(NF-1)}')
+        cd MLProject
+        RUN_ID=$(find mlruns -type d -path "*/artifacts/model" | sort | tail -n 1 | awk -F'/' '{print $(NF-3)}')
         echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
-        echo "Latest run_id: $RUN_ID"
+        echo "Latest RUN_ID: $RUN_ID"
 
     - name: Build Docker Model
       run: |
