@@ -5,7 +5,6 @@ import mlflow.sklearn
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.pipeline import Pipeline
-import os
 import sys
 import warnings
 
@@ -15,9 +14,6 @@ np.random.seed(40)
 if __name__ == "__main__":
 
     file_path = sys.argv[1] if len(sys.argv) > 1 else "weather_dataset_preprocessing.csv"
-
-    mlflow.set_tracking_uri(os.environ.get("MLFLOW_TRACKING_URI", "file:./mlruns"))
-    mlflow.set_experiment("weather-type-prediction")
 
     df = pd.read_csv(file_path)
     X = df.drop(columns=["target"])
@@ -31,12 +27,10 @@ if __name__ == "__main__":
         ("rf", RandomForestClassifier())
     ])
 
-    # ❌ TIDAK PAKAI autolog
-    with mlflow.start_run(run_name="RandomForest"):
-        pipeline.fit(X_train, y_train)
+    pipeline.fit(X_train, y_train)
 
-        mlflow.sklearn.log_model(
-            sk_model=pipeline,
-            artifact_path="model",
-            input_example=X_train.head(5)
-        )
+    mlflow.sklearn.log_model(
+        sk_model=pipeline,
+        artifact_path="model",
+        input_example=X_train.head(5)
+    )
