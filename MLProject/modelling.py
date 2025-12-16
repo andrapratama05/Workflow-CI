@@ -33,4 +33,5 @@ if __name__ == "__main__":
         sk_model=pipeline,
         artifact_path="model",
         input_example=X_train.head(5)
+        registered_model_name="weather_type_model"
     )
